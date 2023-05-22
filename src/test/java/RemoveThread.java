@@ -6,7 +6,14 @@ public class RemoveThread extends TestThread implements Runnable{
     @Override
     public void run() {
         for (int i = 0; i < nums.length; i++) {
-            list.remove(nums[i]);
+            boolean result = list.remove(nums[i]);
+            if (result)
+            {
+                list.succeededDeletions += 1;
+            }
+            else {
+                list.failedDeletions += 1;
+            }
         }
     }
 }
