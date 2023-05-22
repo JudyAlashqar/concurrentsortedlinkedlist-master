@@ -6,7 +6,14 @@ public class ContainThread extends TestThread implements Runnable{
     @Override
     public void run() {
         for (int i = 0; i < nums.length; i++) {
-            list.contain(nums[i]);
+            boolean result = list.contain(nums[i]);
+            if (result)
+            {
+                list.succeededContain += 1;
+            }
+            else {
+                list.failedContain += 1;
+            }
         }
     }
 }
