@@ -27,11 +27,13 @@ public class SyncListTest extends TestCase {
     }
 
     int randLen = 20_000;
-   public void testHelp(SortList list, String label) {
+    public void testHelp(SortList list, String label) {
         RandomSeq seq = new RandomSeq(0, 80_000);
         List<Thread> addThreads = new ArrayList<>();
         List<Thread> containThreads = new ArrayList<>();
         List<Thread> removeThreads = new ArrayList<>();
+        int listLengthAfterAdd = 0;
+        int listLengthAfterRemove = 0;
         for (int i = 0; i < 8; i++) {
             AddThread addThread = new AddThread(seq, randLen / 8, list);
             ContainThread containThread = new ContainThread(seq, randLen / 8, list);
@@ -42,6 +44,7 @@ public class SyncListTest extends TestCase {
             containThreads.add(threadC);
             Thread threadR = new Thread(removeThread);
             removeThreads.add(threadR);
+
         }
 
         long startA = System.currentTimeMillis();
@@ -56,35 +59,46 @@ public class SyncListTest extends TestCase {
         });
         long endA = System.currentTimeMillis() - startA;
 
+        listLengthAfterAdd = list.count();
+        boolean check = list.checkSorted();
         System.out.println("ADD "+label+" execution task: "+endA+" ms");
+        System.out.println("List Sorted After Add: " + check);
+        System.out.println("List Length After Add: " + listLengthAfterAdd);
 
-       long startC = System.currentTimeMillis();
+        long startC = System.currentTimeMillis();
 
-       containThreads.stream().forEach(e -> e.start() );
-       containThreads.stream().forEach(e -> {
-           try {
-               e.join();
-           } catch (InterruptedException ex) {
-               throw new RuntimeException(ex);
-           }
-       });
-       long endC = System.currentTimeMillis() - startC;
-       System.out.println("Contain "+label+" execution task: "+endC+" ms");
+        containThreads.stream().forEach(e -> e.start() );
+        containThreads.stream().forEach(e -> {
+            try {
+                e.join();
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        long endC = System.currentTimeMillis() - startC;
 
-       long startR = System.currentTimeMillis();
+        System.out.println("Contain "+label+" execution task: "+endC+" ms");
+        System.out.println("Total number of successes found: " + list.succeededContain +" failures found: " + list.failedContain);
 
-       removeThreads.stream().forEach(e -> e.start() );
-       removeThreads.stream().forEach(e -> {
-           try {
-               e.join();
-           } catch (InterruptedException ex) {
-               throw new RuntimeException(ex);
-           }
-       });
-       long endR = System.currentTimeMillis() - startR;
+        long startR = System.currentTimeMillis();
 
+        removeThreads.stream().forEach(e -> e.start() );
+        removeThreads.stream().forEach(e -> {
+            try {
+                e.join();
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        long endR = System.currentTimeMillis() - startR;
 
-       System.out.println("Remove "+label+" execution task: "+endR+" ms");
+        listLengthAfterRemove = list.count();
+        check = list.checkSorted();
+
+        System.out.println("Remove "+label+" execution task: "+endR+" ms");
+        System.out.println("List Sorted After Remove: " + check);
+        System.out.println("List Length After Remove " + listLengthAfterRemove);
+        System.out.println("Total number of successes removed: " + list.succeededDeletions +" failures removed: " + list.failedDeletions);
     }
 
     public void testRun(){
